@@ -75,6 +75,11 @@ if avg_like_rate < 0.0001:
 else:
     avg_like_rate_display = f"{avg_like_rate:.4%}"
 
+@st.cache_data
+def compute_global_correlation(video_df, numeric_cols_tuple):
+    """计算并缓存全局相关性矩阵，numeric_cols_tuple 用于 hash"""
+    return video_df[list(numeric_cols_tuple)].corr()
+
 # ==================== 侧边栏 ====================
 st.sidebar.title("📌 导航菜单")
 menu = st.sidebar.radio(
@@ -227,17 +232,15 @@ elif menu == "🔥 高级分析":
     st.header("相关性分析")
     st.caption("基于作品维度的指标相关性（播放量、点赞量、完播率等）")
 
-    # 获取视频表中的数值列
     numeric_cols = video_df.select_dtypes(include=['float64', 'int64']).columns.tolist()
     exclude = ['item_id', 'Unnamed: 0', 'uid', 'author_id', 'music_id']
     numeric_cols = [c for c in numeric_cols if c not in exclude]
 
-    if len(numeric_cols) < 2:
-        st.warning("数值列不足，无法进行相关性分析。")
-    else:
-        # 全局热力图（所有数值列）
+    if len(numeric_cols) >= 2:
+        # 使用缓存计算全局相关性
+        with st.spinner("正在计算全局相关性矩阵..."):
+            corr_all = compute_global_correlation(video_df, tuple(numeric_cols))
         st.subheader("📈 全局相关性热力图")
-        corr_all = video_df[numeric_cols].corr()
         fig = px.imshow(corr_all, text_auto='.2f', aspect='auto',
                         title="所有指标相关性矩阵", color_continuous_scale='RdBu_r', zmin=-1, zmax=1)
         fig.update_layout(paper_bgcolor="#1e2438", plot_bgcolor="#1e2438", font_color="white", height=600)
@@ -255,6 +258,7 @@ elif menu == "🔥 高级分析":
         st.markdown("---")
         st.subheader("🔍 自定义指标分析")
         selected_cols = st.multiselect("选择特定指标（至少2个）", numeric_cols, default=numeric_cols[:4])
+
 
         if len(selected_cols) >= 2:
             corr_sub = video_df[selected_cols].corr()
