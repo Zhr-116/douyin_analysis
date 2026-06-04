@@ -12,7 +12,7 @@ class DataLoader:
 
     def __init__(self, raw_path: str = "./douyin_dataset.csv"):
         self.raw_path = Path(raw_path)
-        self.processed_dir = Path("./processed")
+        self.processed_dir = Path("src/core/processed")
         self.processed_dir.mkdir(parents=True, exist_ok=True)
 
     def load_large_csv(self) -> pd.DataFrame:
