@@ -60,7 +60,6 @@ def main():
     print("\n--- 预计算时间活跃度分析 ---")
     # 时间分析：需要原始 cleaned_data.csv（包含 real_time 和浏览行为）
     try:
-        # 注意：cleaned_data.csv 的路径可能需要调整，这里假设在 src/core/processed/ 下
         raw_df = pd.read_csv("src/core/processed/cleaned_data.csv")
         # 提取小时和星期
         raw_df['real_time'] = pd.to_datetime(raw_df['real_time'], errors='coerce')
